@@ -1,1 +1,1 @@
-console.log("Running application tests");
+console.log("Running _MY_ application tests");
