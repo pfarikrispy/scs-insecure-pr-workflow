@@ -1,0 +1,33 @@
+name: CI Pipeline
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+
+    steps:
+      # Intentionally vulnerable: pull_request_target provides the trusted base
+      # context, then this step replaces it with code controlled by the fork.
+      - name: Checkout untrusted pull request code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: app
+
+      - name: Run tests
+        run: npm test
+        working-directory: app
